@@ -1,1 +1,1 @@
-Crystallin analysis
+Crystallin sequence analysis scripts
