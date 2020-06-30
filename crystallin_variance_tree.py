@@ -5,6 +5,7 @@ Crystallin variance tree
 This is a temporary script file.
 """
 #%%
+
 from ete3 import NCBITaxa
 from ete3 import Tree
 
