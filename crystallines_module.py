@@ -121,6 +121,18 @@ def PCA(percents):
     ev1 = np.dot(percents,e[:,1])
     ev2 = np.dot(percents,e[:,2])
     return ev0, ev1, ev2, v1
+#where n is a list of principal components, don`t start with 0!
+def plotPC(percents, n):
+    mm = np.dot(percents.T,percents)
+    v1,e = sc.eig(mm)
+    for i in range(len(n)):
+        plt.plot(e[i], ".-", label="Principal components "+str(i+1))
+    aa = ['A(Ala)', 'C(Cys)', 'D(Asp)', 'E(Glu)', 'F(Phe)', 'G(Gly)', 'H(His)', 'I(Ile)', 'K(Lys)', 'L(Leu)', 'M(Met)', 'N(Asn)', 'P(Pro)', 'Q(Gln)', 'R(Arg)', 'S(Ser)', 'T(Thr)', 'V(Val)', 'W(Trp)', 'Y(Tyr)']
+    ai=list(range(len(aa)))
+    plt.xlabel('Amino acid type')
+    plt.xticks(ai, aa)
+    plt.legend()
+    plt.title('Principal components')
 #See how absence of one of the aminoacids influences the PCA aa--number of the aa in the list, e.g. tryptophan=18
 def PCA_without(percents, aa):
     x = np.delete(percents, (aa), axis=1)
@@ -215,33 +227,34 @@ def plot_with_mask3D(percents, categories_list, search_group, search_list):
     plt.xlabel('PCA component 1')
     plt.ylabel('PCA component 2')
     
-def plot_tryptophan_content(percents):
+def plot_aa_content(percents,aa):
     ev0, ev1, ev2, v=PCA(percents)
-    tr_perc=percents[:,18]
-    c=tr_perc
+    aas = ['A', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'Y']
+    aa_perc=percents[:,aas.index(aa)]
     # Create 2x2 sub plots
     gs = gridspec.GridSpec(2, 2)
     ax = pl.subplot(gs[0, 0]) # row 0, col 0
-    plt.scatter(ev0,ev1,c=tr_perc,cmap = 'seismic',s=50, alpha=0.5)
+    plt.scatter(ev0,ev1,c=aa_perc,cmap = 'seismic',s=50, alpha=0.5)
     plt.xlabel('PCA component 1')
     plt.ylabel('PCA component 2')
     ax = pl.subplot(gs[0, 1]) # row 0, col 1
-    plt.scatter(ev0,ev2,c=tr_perc,cmap = 'seismic',s=50, alpha=0.5)
+    plt.scatter(ev0,ev2,c=aa_perc,cmap = 'seismic',s=50, alpha=0.5)
     plt.xlabel('PCA component 1')
     plt.ylabel('PCA component 3')
     ax = pl.subplot(gs[1, 0]) # row 1, span all columns
-    plt.scatter(ev1,ev2,c=tr_perc,cmap = 'seismic',s=50, alpha=0.5)
+    plt.scatter(ev1,ev2,c=aa_perc,cmap = 'seismic',s=50, alpha=0.5)
     plt.suptitle("PC 1 and 2 with clustering by the tryptophan content")
     plt.xlabel('PCA component 2')
     plt.ylabel('PCA component 3')
     plt.colorbar()
     
-def plot_tryptophan_content3D(percents):
-    tr_perc=percents[:,18]
-    c=tr_perc
+def plot_aa_content3D(percents, aa):
+    ev0, ev1, ev2, v=PCA(percents)
+    aas = ['A', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'Y']
+    aa_perc=percents[:,aas.index(aa)]
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
-    ax.scatter(ev0,ev1,ev2, c=tr_perc,cmap = 'seismic',s=50, alpha=0.5 )
+    ax.scatter(ev0,ev1,ev2, c=aa_perc,cmap = 'seismic',s=50, alpha=0.5 )
     plt.xlabel('PCA component 1')
     plt.ylabel('PCA component 2')
     plt.title("PCA tryptophan percentage")
@@ -299,7 +312,7 @@ def red_gradient(minimum, maximum, value):
     
 def rgb_to_hex(rgb):
     return '%02x%02x%02x' % rgb
-
+#%%
 def plot_variance(tree,path,aa):
     #cycle through the nodes and add a variance attribute to each node postorder, so we start with the
 #children that have W attribute and recursively create this attribute as we are traversing through the tree
@@ -334,12 +347,13 @@ def plot_variance(tree,path,aa):
             nstyle["bgcolor"]="#"+rgb_to_hex(red_gradient(minimum,maximum,(getattr(node, aa+""))))
             node.add_face(TextFace(getattr(node,aa+"")), column=0, position = "branch-right")
             node.set_style(nstyle)
-    new_tree.render(path, w=700, units="mm", tree_style=ts)
+    new_tree.render(path, w=1400, units="mm", tree_style=ts)
 #%%
-path="/home/mysh/colours/scripts/Crystallins/genbankfiles/crygc_mammals.gp"
+path="/home/mysh/colours/scripts/Crystallins/genbankfiles/crybb1_mammals.gp"
 #path2="/home/mysh/colours/scripts/Crystallins/txt/allgenbank.txt"
 percents, names_list, sources_list, desc_list, taxo_list, keyw_list, taxid_list, aa_dic =percentages_from_proteins(path)
 #percents, names_list, sources_list, desc_list, taxo_list, keyw_list=percentages_from_proteins(path2)
+#%%
 tree=get_sequence_tree(percents, names_list, taxid_list, aa_dic)
 path="/home/mysh/colours/scripts/Crystallins/tree.png"
 #render the tree
@@ -355,9 +369,9 @@ plot_with_mask(percents, ["gamma", "beta"], "type_of_crystallin", desc_list, [0,
 plot_with_mask(percents, ["Mammalia", "Cetacea"], "taxonomic_group", taxo_list, [0,1])
 plot_with_mask3D(percents, ["Mammalia","Cetacea"], "taxonomic_group", taxo_list)
 plot_tryptophan_content(percents)
-plot_tryptophan_content3D(percents)
+plot_aa_content3D(percents, "W")
 #%%
 
 
 path="/home/mysh/colours/scripts/Crystallins/var_tree.png"
-plot_variance(tree&"Eutheria",path,"Y")
+plot_variance(tree,path,"Y")
