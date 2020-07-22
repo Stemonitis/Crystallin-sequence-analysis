@@ -5,6 +5,10 @@ Crystallin variance tree
 This is a temporary script file.
 """
 #%%
+<<<<<<< HEAD
+=======
+
+>>>>>>> a1e6c83dc21f1ab374ad7d39a11391f872d50b87
 from ete3 import NCBITaxa
 from ete3 import Tree
 
@@ -102,4 +106,8 @@ print(name2taxid)
    
    
    
+<<<<<<< HEAD
    
+=======
+   
+>>>>>>> a1e6c83dc21f1ab374ad7d39a11391f872d50b87
